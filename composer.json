@@ -1,0 +1,44 @@
+{
+    "name": "ellipse/dispatcher-controller",
+    "type": "library",
+    "description": "Psr-15 middleware dispatcher factory resolving controller strings from Psr-11 container",
+    "keywords": [
+        "Psr-15",
+        "Psr-11",
+        "middleware",
+        "request-handler",
+        "dispatcher",
+        "container",
+        "controller"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/ellipsephp/dispatcher-controller",
+    "support": {
+        "issues": "https://github.com/ellipsephp/dispatcher-controller/issues",
+        "source": "https://github.com/ellipsephp/dispatcher-controller"
+    },
+    "authors": [
+        {
+            "name": "Pierre Mallinjoud",
+            "email": "pierre.mallinjoud@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "psr/container": "^1.0",
+        "psr/http-message": "^1.0",
+        "http-interop/http-server-handler": "^1.0",
+        "http-interop/http-server-middleware": "^1.0",
+        "ellipse/dispatcher": "^1.1",
+        "ellipse/resolvable-callable": "^1.0"
+    },
+    "require-dev": {
+        "kahlan/kahlan": "^4.0",
+        "eloquent/phony-kahlan": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ellipse\\Dispatcher\\": "src"
+        }
+    }
+}
