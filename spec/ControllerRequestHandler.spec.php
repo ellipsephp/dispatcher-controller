@@ -9,43 +9,110 @@ use Psr\Http\Message\ResponseInterface;
 
 use Interop\Http\Server\RequestHandlerInterface;
 
-use Ellipse\Dispatcher\Controller;
+use Ellipse\Resolvable\ResolvableCallable;
+use Ellipse\Resolvable\ResolvableCallableFactory;
+
+use Ellipse\Dispatcher\ControllerContainer;
 use Ellipse\Dispatcher\ControllerRequestHandler;
-use Ellipse\Dispatcher\ContainerFactory;
+use Ellipse\Dispatcher\Exceptions\ResponseTypeException;
 
 describe('ControllerRequestHandler', function () {
 
     beforeEach(function () {
 
-        $this->factory = mock(ContainerFactory::class);
-        $this->controller = mock(Controller::class);
-
-        $this->handler = new ControllerRequestHandler($this->factory->get(), $this->controller->get());
+        $this->container = mock(ContainerInterface::class);
 
     });
 
     it('should implement RequestHandlerInterface', function () {
 
-        expect($this->handler)->toBeAnInstanceOf(RequestHandlerInterface::class);
+        $test = new ControllerRequestHandler($this->container->get(), 'Controller@action');
+
+        expect($test)->toBeAnInstanceOf(RequestHandlerInterface::class);
 
     });
 
     describe('->handle()', function () {
 
-        it('should proxy the controller ->response() method with the container and the given request', function () {
+        beforeEach(function () {
 
-            $container = mock(ContainerInterface::class)->get();
+            $factory = mock(ResolvableCallableFactory::class);
 
-            $request = mock(ServerRequestInterface::class)->get();
-            $response = mock(ResponseInterface::class)->get();
+            allow(ResolvableCallableFactory::class)->toBe($factory->get());
 
-            $this->factory->__invoke->with($request)->returns($container);
+            $this->request = mock(ServerRequestInterface::class);
+            $this->response = mock(ResponseInterface::class)->get();
 
-            $this->controller->response->with($container, $request)->returns($response);
+            $this->reflection = new ControllerContainer($this->container->get(), $this->request->get());
 
-            $test = $this->handler->handle($request);
+            $controller = mock(['action' => function () {}])->get();
 
-            expect($test)->toBe($response);
+            $this->container->get->with('Controller')->returns($controller);
+
+            $this->resolvable = mock(ResolvableCallable::class);
+
+            $factory->__invoke->with([$controller, 'action'])->returns($this->resolvable);
+
+        });
+
+        context('when the controller returns an implementation of ResponseInterface', function () {
+
+            context('when the controller string do not have attribute values', function () {
+
+                it('should resolve the controller action using an empty array placeholders', function () {
+
+                    $handler = new ControllerRequestHandler($this->container->get(), 'Controller@action');
+
+                    $this->resolvable->value->with($this->reflection, [])->returns($this->response);
+
+                    $test = $handler->handle($this->request->get());
+
+                    expect($test)->toBe($this->response);
+
+                });
+
+            });
+
+            context('when the controller string has attribute values', function () {
+
+                it('should resolve the controller action using the attribute values as placeholders', function () {
+
+                    $handler = new ControllerRequestHandler($this->container->get(), 'Controller@action:a1,a2');
+
+                    $this->request->getAttribute->with('a1')->returns('v1');
+                    $this->request->getAttribute->with('a2')->returns('v2');
+
+                    $this->resolvable->value->with($this->reflection, ['v1', 'v2'])->returns($this->response);
+
+                    $test = $handler->handle($this->request->get());
+
+                    expect($test)->toBe($this->response);
+
+                });
+
+            });
+
+        });
+
+        context('when the controller does not return an implementation of ResponseInterface', function () {
+
+            it('should throw a ResponseTypeException', function () {
+
+                $handler = new ControllerRequestHandler($this->container->get(), 'Controller@action');
+
+                $this->resolvable->value->with($this->reflection, [])->returns('response');
+
+                $test = function () use ($handler) {
+
+                    $handler->handle($this->request->get());
+
+                };
+
+                $exception = new ResponseTypeException('response');
+
+                expect($test)->toThrow($exception);
+
+            });
 
         });
 

@@ -1,24 +1,21 @@
 <?php
 
-use function Eloquent\Phony\Kahlan\stub;
 use function Eloquent\Phony\Kahlan\mock;
+
+use Psr\Container\ContainerInterface;
 
 use Interop\Http\Server\RequestHandlerInterface;
 
 use Ellipse\Dispatcher;
 use Ellipse\DispatcherFactoryInterface;
-use Ellipse\Dispatcher\ContainerFactory;
 use Ellipse\Dispatcher\ControllerResolver;
 use Ellipse\Dispatcher\ControllerRequestHandler;
-use Ellipse\Dispatcher\Controller;
 
 describe('ControllerResolver', function () {
 
     beforeEach(function () {
 
-        $this->callable = stub();
-
-        $this->factory = new ContainerFactory($this->callable);
+        $this->container = mock(ContainerInterface::class)->get();
 
         $this->delegate = mock(DispatcherFactoryInterface::class);
 
@@ -26,7 +23,7 @@ describe('ControllerResolver', function () {
 
     it('should implement DispatcherFactoryInterface', function () {
 
-        $test = new ControllerResolver('', $this->callable, $this->delegate->get());
+        $test = new ControllerResolver('', $this->container, $this->delegate->get());
 
         expect($test)->toBeAnInstanceOf(DispatcherFactoryInterface::class);
 
@@ -44,7 +41,7 @@ describe('ControllerResolver', function () {
 
             it('should proxy the delegate with the given request handler', function () {
 
-                $resolver = new ControllerResolver('', $this->callable, $this->delegate->get());
+                $resolver = new ControllerResolver('', $this->container, $this->delegate->get());
 
                 $this->delegate->__invoke->with('handler', '~')->returns($this->dispatcher);
 
@@ -62,10 +59,9 @@ describe('ControllerResolver', function () {
 
                 it('should return a new ControllerRequestHandler using the given controller string', function () {
 
-                    $resolver = new ControllerResolver('', $this->callable, $this->delegate->get());
+                    $resolver = new ControllerResolver('', $this->container, $this->delegate->get());
 
-                    $controller = new Controller('Controller@action:id');
-                    $handler = new ControllerRequestHandler($this->factory, $controller);
+                    $handler = new ControllerRequestHandler($this->container, 'Controller@action:id');
 
                     $this->delegate->__invoke->with($handler, '~')->returns($this->dispatcher);
 
@@ -81,10 +77,9 @@ describe('ControllerResolver', function () {
 
                 it('should return a new ControllerRequestHandler using the given controller string prepended with the namespace', function () {
 
-                    $resolver = new ControllerResolver('Namespace', $this->callable, $this->delegate->get());
+                    $resolver = new ControllerResolver('Namespace', $this->container, $this->delegate->get());
 
-                    $controller = new Controller('Namespace\\Controller@action:id');
-                    $handler = new ControllerRequestHandler($this->factory, $controller);
+                    $handler = new ControllerRequestHandler($this->container, 'Namespace\\Controller@action:id');
 
                     $this->delegate->__invoke->with($handler, '~')->returns($this->dispatcher);
 
@@ -102,7 +97,7 @@ describe('ControllerResolver', function () {
 
             it('should proxy the delegate with an empty array', function () {
 
-                $resolver = new ControllerResolver('', $this->callable, $this->delegate->get());
+                $resolver = new ControllerResolver('', $this->container, $this->delegate->get());
 
                 $this->delegate->__invoke->with('~', [])->returns($this->dispatcher);
 
@@ -120,7 +115,7 @@ describe('ControllerResolver', function () {
 
                 $test = function ($middleware) {
 
-                    $resolver = new ControllerResolver('', $this->callable, $this->delegate->get());
+                    $resolver = new ControllerResolver('', $this->container, $this->delegate->get());
 
                     $this->delegate->__invoke->with('~', $middleware)->returns($this->dispatcher);
 

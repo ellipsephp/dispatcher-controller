@@ -2,53 +2,80 @@
 
 namespace Ellipse\Dispatcher;
 
+use Psr\Container\ContainerInterface;
+
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 use Interop\Http\Server\RequestHandlerInterface;
 
-use Ellipse\Dispatcher\ContainerFactory;
+use Ellipse\Container\ReflectionContainer;
+use Ellipse\Container\OverriddenContainer;
+use Ellipse\Resolvable\ResolvableCallableFactory;
+use Ellipse\Dispatcher\Exceptions\ResponseTypeException;
 
 class ControllerRequestHandler implements RequestHandlerInterface
 {
     /**
-     * The container factory.
+     * The container.
      *
-     * @var \Ellipse\Dispatcher\ContainerFactory
+     * @var \Psr\Container\ContainerInterface
      */
-    private $factory;
+    private $container;
 
     /**
-     * The controller to use to produce a response.
+     * The controller string.
      *
-     * @var \Ellipse\Dispatcher\Controller
+     * @var string
      */
-    private $controller;
+    private $str;
 
     /**
-     * Set up a controller request handler with the given factory and
-     * controller.
+     * Set up a controller request handler with the given container and
+     * controller string.
      *
-     * @param \Ellipse\Dispatcher\ContainerFactory  $factory
-     * @param \Ellipse\Dispatcher\Controller        $controller
+     * @param \Psr\Container\ContainerInterface $factory
+     * @param string                            $str
      */
-    public function __construct(ContainerFactory $factory, Controller $controller)
+    public function __construct(ContainerInterface $container, string $str)
     {
-        $this->factory = $factory;
-        $this->controller = $controller;
+        $this->container = $container;
+        $this->str = $str;
     }
 
     /**
-     * Use the controller to produce a response from the given request with the
-     * container produced by the container factory.
+     * Return a response from the controller method defined by the controller
+     * string. Use a controller container to get the controller class and
+     * execute the controller method using a resolvable callable factory.
      *
      * @param \Psr\Http\Message\ServerRequestInterface  $request
      * @return \Psr\Http\Message\ResponseInterface
+     * @throws \Ellipse\Dispatcher\Exceptions\ResponseTypeException
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $container = ($this->factory)($request);
+        $container = new ControllerContainer($this->container, $request);
 
-        return $this->controller->response($container, $request);
+        $factory = new ResolvableCallableFactory;
+
+        $parts = explode(':', $this->str);
+
+        [$class, $method] = explode('@', $parts[0]);
+
+        $attributes = array_filter(preg_split('/\s*,\s*/', $parts[1] ?? ''));
+
+        $placeholders = array_map([$request, 'getAttribute'], $attributes);
+
+        $controller = $container->get($class);
+
+        $response = $factory([$controller, $method])->value($container, $placeholders);
+
+        if ($response instanceof ResponseInterface) {
+
+            return $response;
+
+        }
+
+        throw new ResponseTypeException($response);
     }
 }

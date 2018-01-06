@@ -2,11 +2,12 @@
 
 namespace Ellipse\Dispatcher;
 
+use Psr\Container\ContainerInterface;
+
 use Interop\Http\Server\RequestHandlerInterface;
 
 use Ellipse\Dispatcher;
 use Ellipse\DispatcherFactoryInterface;
-use Ellipse\Dispatcher\ContainerFactory;
 
 class ControllerResolver implements DispatcherFactoryInterface
 {
@@ -18,11 +19,11 @@ class ControllerResolver implements DispatcherFactoryInterface
     private $namespace;
 
     /**
-     * The container factory.
+     * The container.
      *
-     * @var \Ellipse\Dispatcher\ContainerFactory
+     * @var \Psr\Container\ContainerInterface
      */
-    private $factory;
+    private $container;
 
     /**
      * The delegate.
@@ -32,17 +33,17 @@ class ControllerResolver implements DispatcherFactoryInterface
     private $delegate;
 
     /**
-     * Set up a controller resolver with the given controller namespace, factory
-     * and delegate.
+     * Set up a controller resolver with the given controller namespace,
+     * container and delegate.
      *
      * @param string                                $namespace
-     * @param callable                              $factory
+     * @param \Psr\Container\ContainerInterface     $container
      * @param \Ellipse\DispatcherFactoryInterface   $delegate
      */
-    public function __construct(string $namespace, callable $factory, DispatcherFactoryInterface $delegate)
+    public function __construct(string $namespace, ContainerInterface $container, DispatcherFactoryInterface $delegate)
     {
         $this->namespace = $namespace;
-        $this->factory = new ContainerFactory($factory);
+        $this->container = $container;
         $this->delegate = $delegate;
     }
 
@@ -60,7 +61,7 @@ class ControllerResolver implements DispatcherFactoryInterface
 
             $str = $this->namespace == '' ? $handler : $this->namespace . '\\' . $handler;
 
-            $handler = new ControllerRequestHandler($this->factory, new Controller($str));
+            $handler = new ControllerRequestHandler($this->container, $str);
 
         }
 
