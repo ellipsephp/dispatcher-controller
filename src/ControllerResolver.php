@@ -12,13 +12,6 @@ use Ellipse\DispatcherFactoryInterface;
 class ControllerResolver implements DispatcherFactoryInterface
 {
     /**
-     * The controller namespace.
-     *
-     * @var string
-    */
-    private $namespace;
-
-    /**
      * The container.
      *
      * @var \Psr\Container\ContainerInterface
@@ -33,23 +26,20 @@ class ControllerResolver implements DispatcherFactoryInterface
     private $delegate;
 
     /**
-     * Set up a controller resolver with the given controller namespace,
-     * container and delegate.
+     * Set up a controller resolver with the given container and delegate.
      *
-     * @param string                                $namespace
      * @param \Psr\Container\ContainerInterface     $container
      * @param \Ellipse\DispatcherFactoryInterface   $delegate
      */
-    public function __construct(string $namespace, ContainerInterface $container, DispatcherFactoryInterface $delegate)
+    public function __construct(ContainerInterface $container, DispatcherFactoryInterface $delegate)
     {
-        $this->namespace = $namespace;
         $this->container = $container;
         $this->delegate = $delegate;
     }
 
     /**
-     * Proxy the delegate by wrapping controller strings into controller request
-     * handlers.
+     * Proxy the delegate by wrapping controller definitions into controller
+     * request handlers.
      *
      * @param mixed     $handler
      * @param iterable  $middleware
@@ -57,11 +47,23 @@ class ControllerResolver implements DispatcherFactoryInterface
      */
     public function __invoke($handler, iterable $middleware = []): Dispatcher
     {
-        if (is_string($handler) && strpos($handler, '@') !== false) {
+        // Handler must be an array of at least two elements.
+        if (is_array($handler) && count($handler) > 1) {
 
-            $str = $this->namespace == '' ? $handler : $this->namespace . '\\' . $handler;
+            // The two elements must be strings.
+            if (is_string($handler[0]) && is_string($handler[1])) {
 
-            $handler = new ControllerRequestHandler($this->container, $str);
+                // The second string must start with an @.
+                if ($handler[1][0] === '@') {
+
+                    $class = array_shift($handler);
+                    $method = substr(array_shift($handler), 1);
+
+                    $handler = new ControllerRequestHandler($this->container, $class, $method, $handler);
+
+                }
+
+            }
 
         }
 

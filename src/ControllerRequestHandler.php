@@ -24,29 +24,55 @@ class ControllerRequestHandler implements RequestHandlerInterface
     private $container;
 
     /**
-     * The controller string.
+     * The resolvable callable factory.
+     *
+     * @var \Ellipse\Resolvable\ResolvableCallableFactory
+     */
+    private $factory;
+
+    /**
+     * The controller class name.
      *
      * @var string
      */
-    private $str;
+    private $class;
 
     /**
-     * Set up a controller request handler with the given container and
-     * controller string.
+     * The controller method.
+     *
+     * @var string
+     */
+    private $method;
+
+    /**
+     * The request attributes to inject in the method.
+     *
+     * @var array
+     */
+    private $attributes;
+
+    /**
+     * Set up a controller request handler with the given container, class name,
+     * method and attributes.
      *
      * @param \Psr\Container\ContainerInterface $factory
-     * @param string                            $str
+     * @param string                            $class
+     * @param string                            $method
+     * @param array                             $attributes
      */
-    public function __construct(ContainerInterface $container, string $str)
+    public function __construct(ContainerInterface $container, string $class, string $method, array $attributes = [])
     {
         $this->container = $container;
-        $this->str = $str;
+        $this->factory = new ResolvableCallableFactory;
+        $this->class = $class;
+        $this->method = $method;
+        $this->attributes = $attributes;
     }
 
     /**
-     * Return a response from the controller method defined by the controller
-     * string. Use a controller container to get the controller class and
-     * execute the controller method using a resolvable callable factory.
+     * Return a response from the controller method. Use a controller container
+     * using the given request to get the controller class and execute the
+     * controller method using the resolvable callable factory.
      *
      * @param \Psr\Http\Message\ServerRequestInterface  $request
      * @return \Psr\Http\Message\ResponseInterface
@@ -56,19 +82,11 @@ class ControllerRequestHandler implements RequestHandlerInterface
     {
         $container = new ControllerContainer($this->container, $request);
 
-        $factory = new ResolvableCallableFactory;
+        $placeholders = array_map([$request, 'getAttribute'], $this->attributes);
 
-        $parts = explode(':', $this->str);
+        $controller = $container->get($this->class);
 
-        [$class, $method] = explode('@', $parts[0]);
-
-        $attributes = array_filter(preg_split('/\s*,\s*/', $parts[1] ?? ''));
-
-        $placeholders = array_map([$request, 'getAttribute'], $attributes);
-
-        $controller = $container->get($class);
-
-        $response = $factory([$controller, $method])->value($container, $placeholders);
+        $response = ($this->factory)([$controller, $this->method])->value($container, $placeholders);
 
         if ($response instanceof ResponseInterface) {
 

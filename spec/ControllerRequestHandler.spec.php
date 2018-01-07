@@ -21,12 +21,15 @@ describe('ControllerRequestHandler', function () {
     beforeEach(function () {
 
         $this->container = mock(ContainerInterface::class);
+        $this->factory = mock(ResolvableCallableFactory::class);
+
+        allow(ResolvableCallableFactory::class)->toBe($this->factory->get());
 
     });
 
     it('should implement RequestHandlerInterface', function () {
 
-        $test = new ControllerRequestHandler($this->container->get(), 'Controller@action');
+        $test = new ControllerRequestHandler($this->container->get(), 'Controller', 'action');
 
         expect($test)->toBeAnInstanceOf(RequestHandlerInterface::class);
 
@@ -36,32 +39,27 @@ describe('ControllerRequestHandler', function () {
 
         beforeEach(function () {
 
-            $factory = mock(ResolvableCallableFactory::class);
-
-            allow(ResolvableCallableFactory::class)->toBe($factory->get());
-
             $this->request = mock(ServerRequestInterface::class);
             $this->response = mock(ResponseInterface::class)->get();
-
-            $this->reflection = new ControllerContainer($this->container->get(), $this->request->get());
 
             $controller = mock(['action' => function () {}])->get();
 
             $this->container->get->with('Controller')->returns($controller);
 
+            $this->reflection = new ControllerContainer($this->container->get(), $this->request->get());
             $this->resolvable = mock(ResolvableCallable::class);
 
-            $factory->__invoke->with([$controller, 'action'])->returns($this->resolvable);
+            $this->factory->__invoke->with([$controller, 'action'])->returns($this->resolvable);
 
         });
 
         context('when the controller returns an implementation of ResponseInterface', function () {
 
-            context('when the controller string do not have attribute values', function () {
+            context('when there is no attributes', function () {
 
-                it('should resolve the controller action using an empty array placeholders', function () {
+                it('should resolve the controller action using an empty array of placeholders', function () {
 
-                    $handler = new ControllerRequestHandler($this->container->get(), 'Controller@action');
+                    $handler = new ControllerRequestHandler($this->container->get(), 'Controller', 'action');
 
                     $this->resolvable->value->with($this->reflection, [])->returns($this->response);
 
@@ -73,11 +71,11 @@ describe('ControllerRequestHandler', function () {
 
             });
 
-            context('when the controller string has attribute values', function () {
+            context('when there is attributes', function () {
 
                 it('should resolve the controller action using the attribute values as placeholders', function () {
 
-                    $handler = new ControllerRequestHandler($this->container->get(), 'Controller@action:a1,a2');
+                    $handler = new ControllerRequestHandler($this->container->get(), 'Controller', 'action', ['a1', 'a2']);
 
                     $this->request->getAttribute->with('a1')->returns('v1');
                     $this->request->getAttribute->with('a2')->returns('v2');
@@ -98,7 +96,7 @@ describe('ControllerRequestHandler', function () {
 
             it('should throw a ResponseTypeException', function () {
 
-                $handler = new ControllerRequestHandler($this->container->get(), 'Controller@action');
+                $handler = new ControllerRequestHandler($this->container->get(), 'Controller', 'action');
 
                 $this->resolvable->value->with($this->reflection, [])->returns('response');
 
