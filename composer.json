@@ -29,7 +29,7 @@
         "psr/http-message": "^1.0",
         "http-interop/http-server-handler": "^1.0",
         "http-interop/http-server-middleware": "^1.0",
-        "ellipse/dispatcher": "^1.1",
+        "ellipse/dispatcher": "^1.2",
         "ellipse/container-reflection": "^1.0",
         "ellipse/container-overridden": "^1.0",
         "ellipse/resolvable-callable": "^1.0"
