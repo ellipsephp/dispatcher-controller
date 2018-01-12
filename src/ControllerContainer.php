@@ -6,7 +6,6 @@ use Psr\Container\ContainerInterface;
 
 use Psr\Http\Message\ServerRequestInterface;
 
-use Ellipse\Container\ReflectionContainer;
 use Ellipse\Container\OverriddenContainer;
 
 class ControllerContainer implements ContainerInterface
@@ -26,11 +25,9 @@ class ControllerContainer implements ContainerInterface
      */
     public function __construct(ContainerInterface $container, ServerRequestInterface $request)
     {
-        $this->delegate = new ReflectionContainer(
-            new OverriddenContainer($container, [
-                ServerRequestInterface::class => $request,
-            ])
-        );
+        $this->delegate = new OverriddenContainer($container, [
+            ServerRequestInterface::class => $request,
+        ]);
     }
 
     /**
