@@ -6,8 +6,7 @@ use Psr\Container\ContainerInterface;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-
-use Interop\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 use Ellipse\Resolvable\ResolvableCallable;
 use Ellipse\Resolvable\ResolvableCallableFactory;

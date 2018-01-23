@@ -4,7 +4,7 @@ use function Eloquent\Phony\Kahlan\mock;
 
 use Psr\Container\ContainerInterface;
 
-use Interop\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 use Ellipse\Dispatcher;
 use Ellipse\DispatcherFactoryInterface;
