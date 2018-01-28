@@ -10,7 +10,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 use Ellipse\Container\ReflectionContainer;
 use Ellipse\Container\OverriddenContainer;
-use Ellipse\Resolvable\ResolvableCallableFactory;
+use Ellipse\Resolvable\DefaultResolvableCallableFactory;
 use Ellipse\Dispatcher\Exceptions\ResponseTypeException;
 
 class ControllerRequestHandler implements RequestHandlerInterface
@@ -25,7 +25,7 @@ class ControllerRequestHandler implements RequestHandlerInterface
     /**
      * The resolvable callable factory.
      *
-     * @var \Ellipse\Resolvable\ResolvableCallableFactory
+     * @var \Ellipse\Resolvable\DefaultResolvableCallableFactory
      */
     private $factory;
 
@@ -62,7 +62,7 @@ class ControllerRequestHandler implements RequestHandlerInterface
     public function __construct(ContainerInterface $container, string $class, string $method, array $attributes = [])
     {
         $this->container = $container;
-        $this->factory = new ResolvableCallableFactory;
+        $this->factory = new DefaultResolvableCallableFactory;
         $this->class = $class;
         $this->method = $method;
         $this->attributes = $attributes;

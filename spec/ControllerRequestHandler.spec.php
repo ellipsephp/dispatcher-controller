@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 use Ellipse\Resolvable\ResolvableCallable;
-use Ellipse\Resolvable\ResolvableCallableFactory;
+use Ellipse\Resolvable\DefaultResolvableCallableFactory;
 
 use Ellipse\Dispatcher\ControllerContainer;
 use Ellipse\Dispatcher\ControllerRequestHandler;
@@ -20,9 +20,9 @@ describe('ControllerRequestHandler', function () {
     beforeEach(function () {
 
         $this->container = mock(ContainerInterface::class);
-        $this->factory = mock(ResolvableCallableFactory::class);
+        $this->factory = mock(DefaultResolvableCallableFactory::class);
 
-        allow(ResolvableCallableFactory::class)->toBe($this->factory->get());
+        allow(DefaultResolvableCallableFactory::class)->toBe($this->factory->get());
 
     });
 
