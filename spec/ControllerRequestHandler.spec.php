@@ -13,7 +13,6 @@ use Ellipse\Resolvable\DefaultResolvableCallableFactory;
 
 use Ellipse\Dispatcher\ControllerContainer;
 use Ellipse\Dispatcher\ControllerRequestHandler;
-use Ellipse\Dispatcher\Exceptions\ResponseTypeException;
 
 describe('ControllerRequestHandler', function () {
 
@@ -52,62 +51,36 @@ describe('ControllerRequestHandler', function () {
 
         });
 
-        context('when the controller returns an implementation of ResponseInterface', function () {
+        context('when there is no attributes', function () {
 
-            context('when there is no attributes', function () {
+            it('should resolve the controller action using an empty array of placeholders', function () {
 
-                it('should resolve the controller action using an empty array of placeholders', function () {
+                $handler = new ControllerRequestHandler($this->container->get(), 'Controller', 'action');
 
-                    $handler = new ControllerRequestHandler($this->container->get(), 'Controller', 'action');
+                $this->resolvable->value->with($this->reflection, [])->returns($this->response);
 
-                    $this->resolvable->value->with($this->reflection, [])->returns($this->response);
+                $test = $handler->handle($this->request->get());
 
-                    $test = $handler->handle($this->request->get());
-
-                    expect($test)->toBe($this->response);
-
-                });
-
-            });
-
-            context('when there is attributes', function () {
-
-                it('should resolve the controller action using the attribute values as placeholders', function () {
-
-                    $handler = new ControllerRequestHandler($this->container->get(), 'Controller', 'action', ['a1', 'a2']);
-
-                    $this->request->getAttribute->with('a1')->returns('v1');
-                    $this->request->getAttribute->with('a2')->returns('v2');
-
-                    $this->resolvable->value->with($this->reflection, ['v1', 'v2'])->returns($this->response);
-
-                    $test = $handler->handle($this->request->get());
-
-                    expect($test)->toBe($this->response);
-
-                });
+                expect($test)->toBe($this->response);
 
             });
 
         });
 
-        context('when the controller does not return an implementation of ResponseInterface', function () {
+        context('when there is attributes', function () {
 
-            it('should throw a ResponseTypeException', function () {
+            it('should resolve the controller action using the attribute values as placeholders', function () {
 
-                $handler = new ControllerRequestHandler($this->container->get(), 'Controller', 'action');
+                $handler = new ControllerRequestHandler($this->container->get(), 'Controller', 'action', ['a1', 'a2']);
 
-                $this->resolvable->value->with($this->reflection, [])->returns('response');
+                $this->request->getAttribute->with('a1')->returns('v1');
+                $this->request->getAttribute->with('a2')->returns('v2');
 
-                $test = function () use ($handler) {
+                $this->resolvable->value->with($this->reflection, ['v1', 'v2'])->returns($this->response);
 
-                    $handler->handle($this->request->get());
+                $test = $handler->handle($this->request->get());
 
-                };
-
-                $exception = new ResponseTypeException('response');
-
-                expect($test)->toThrow($exception);
+                expect($test)->toBe($this->response);
 
             });
 

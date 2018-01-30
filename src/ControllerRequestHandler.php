@@ -11,7 +11,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Ellipse\Container\ReflectionContainer;
 use Ellipse\Container\OverriddenContainer;
 use Ellipse\Resolvable\DefaultResolvableCallableFactory;
-use Ellipse\Dispatcher\Exceptions\ResponseTypeException;
 
 class ControllerRequestHandler implements RequestHandlerInterface
 {
@@ -75,7 +74,6 @@ class ControllerRequestHandler implements RequestHandlerInterface
      *
      * @param \Psr\Http\Message\ServerRequestInterface  $request
      * @return \Psr\Http\Message\ResponseInterface
-     * @throws \Ellipse\Dispatcher\Exceptions\ResponseTypeException
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -85,14 +83,8 @@ class ControllerRequestHandler implements RequestHandlerInterface
 
         $controller = $container->get($this->class);
 
-        $response = ($this->factory)([$controller, $this->method])->value($container, $placeholders);
+        $action = [$controller, $this->method];
 
-        if ($response instanceof ResponseInterface) {
-
-            return $response;
-
-        }
-
-        throw new ResponseTypeException($response);
+        return ($this->factory)($action)->value($container, $placeholders);
     }
 }

@@ -41,8 +41,6 @@ Then the controller method is executed by using the container to retrieve values
 
 Also when the controller method has a parameter type hinted as `Psr\Http\Message\ServerRequestInterface`, the actual Psr-7 request received by the request handler is used. It means when a middleware create a new request (since Psr-7 requests are immutable) the controller method receive this new request.
 
-Finally the controller method must return an instance implementing `Psr\Http\Message\ResponseInterface`. Otherwise an `Ellipse\Dispatcher\Exceptions\ResponseTypeException` is thrown.
-
 ```php
 <?php
 
