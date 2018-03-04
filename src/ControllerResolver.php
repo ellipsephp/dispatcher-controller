@@ -41,11 +41,11 @@ class ControllerResolver implements DispatcherFactoryInterface
      * Proxy the delegate by wrapping controller definitions into controller
      * request handlers.
      *
-     * @param mixed     $handler
-     * @param iterable  $middleware
+     * @param mixed $handler
+     * @param array $middleware
      * @return \Ellipse\Dispatcher
      */
-    public function __invoke($handler, iterable $middleware = []): Dispatcher
+    public function __invoke($handler, array $middleware = []): Dispatcher
     {
         // Handler must be an array of at least two elements.
         if (is_array($handler) && count($handler) > 1) {

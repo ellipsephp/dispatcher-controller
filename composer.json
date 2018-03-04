@@ -24,12 +24,12 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.0",
         "psr/container": "^1.0",
         "psr/http-message": "^1.0",
         "psr/http-server-handler": "^1.0",
         "psr/http-server-middleware": "^1.0",
-        "ellipse/dispatcher": "^1.3",
+        "ellipse/dispatcher": "^1.4",
         "ellipse/container-overridden": "^1.0",
         "ellipse/resolvable-callable": "^1.0.3"
     },

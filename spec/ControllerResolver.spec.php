@@ -98,7 +98,7 @@ describe('ControllerResolver', function () {
 
         });
 
-        context('when no iterable list of middleware is given', function () {
+        context('when no middleware queue is given', function () {
 
             it('should proxy the delegate with an empty array', function () {
 
@@ -112,29 +112,15 @@ describe('ControllerResolver', function () {
 
         });
 
-        context('when an iterable list of middleware is given', function () {
+        context('when an middleware queue is given', function () {
 
-            it('should proxy the delegate with the given iterable list of middleware', function () {
+            it('should proxy the delegate with the given middleware queue', function () {
 
-                $test = function ($middleware) {
+                $this->delegate->__invoke->with('~', ['middleware'])->returns($this->dispatcher);
 
-                    $this->delegate->__invoke->with('~', $middleware)->returns($this->dispatcher);
+                $test = ($this->resolver)('handler', ['middleware']);
 
-                    $test = ($this->resolver)('handler', $middleware);
-
-                    expect($test)->toBe($this->dispatcher);
-
-                };
-
-                $middleware = ['middleware1', 'middleware2'];
-
-                $test($middleware);
-                $test(new ArrayIterator($middleware));
-                $test(new class ($middleware) implements IteratorAggregate
-                {
-                    public function __construct($middleware) { $this->middleware = $middleware; }
-                    public function getIterator() { return new ArrayIterator($this->middleware); }
-                });
+                expect($test)->toBe($this->dispatcher);
 
             });
 
