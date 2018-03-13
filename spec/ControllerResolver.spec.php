@@ -9,7 +9,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Ellipse\Dispatcher;
 use Ellipse\DispatcherFactoryInterface;
 use Ellipse\Dispatcher\ControllerResolver;
-use Ellipse\Dispatcher\ControllerRequestHandler;
+use Ellipse\Handlers\ControllerRequestHandler;
 
 describe('ControllerResolver', function () {
 

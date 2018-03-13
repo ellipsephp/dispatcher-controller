@@ -8,6 +8,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 use Ellipse\Dispatcher;
 use Ellipse\DispatcherFactoryInterface;
+use Ellipse\Handlers\ControllerRequestHandler;
 
 class ControllerResolver implements DispatcherFactoryInterface
 {
