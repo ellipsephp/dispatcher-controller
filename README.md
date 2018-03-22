@@ -133,7 +133,20 @@ $dispatcher3->handle($request);
 
 ## Example using auto wiring
 
-It can be cumbersome to register every controllers in the container. Here is how to auto wire controller classes using the `Ellipse\Container\ReflectionContainer` class from the [ellipse/container-reflection](https://github.com/ellipsephp/container-reflection) package.
+It can be cumbersome to register every controller classes in the container. Here is how to auto wire controller instances using the `Ellipse\Container\ReflectionContainer` class from the [ellipse/container-reflection](https://github.com/ellipsephp/container-reflection) package.
+
+```php
+<?php
+
+// Let controller classes implement some dummy interface specific to the application.
+
+namespace App\Controllers;
+
+class SomeController implements ControllerInterface
+{
+    // ...
+}
+```
 
 ```php
 <?php
@@ -146,36 +159,21 @@ use Ellipse\DispatcherFactory;
 use Ellipse\Dispatcher\ControllerResolver;
 use Ellipse\Container\ReflectionContainer;
 
+use App\Controllers\ControllerInterface;
 use App\Controllers\SomeController;
-
-// Get some incoming Psr-7 request.
-$request = some_psr7_request_factory();
 
 // Get some Psr-11 container.
 $container = new SomePsr11Container;
 
-// Register some services in the container.
-$container->set(SomeService::class, function ($container) {
-
-    return new SomeService;
-
-});
-
-$container->set(SomeOtherService::class, function ($container) {
-
-    return new SomeOtherService;
-
-});
-
 // Decorate the container with a reflection container.
-$container = new ReflectionContainer($container);
+// Specify the classes implementing ControllerInterface can be auto wired.
+$reflection = new ReflectionContainer($container, [
+    ControllerInterface::class,
+]);
 
-// Get a decorated dispatcher factory.
-$factory = new ControllerResolver($container, new DispatcherFactory);
+// Create a controller resolver using the reflection container.
+$factory = new ControllerResolver($reflection, new DispatcherFactory);
 
-// Dispatchers using controller definitions as Psr-15 request handler can now be created.
+// An instance of SomeController is built using auto wiring.
 $dispatcher = $factory([SomeController::class, '@index'], [new SomeMiddleware]);
-
-// Here a new instance of SomeController is built by injecting the defined instance of SomeService.
-$dispatcher->handle($request);
 ```
