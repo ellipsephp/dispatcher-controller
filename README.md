@@ -42,9 +42,9 @@ An instance of `ControllerRequestHandler` needs the container entry id of an obj
 
 - The first one is the controller fully qualified class name
 - The second one is the name of the controller method to execute prepended with `'@'`
-- The optional next elements are strings representing names of the request attributes to use as parameters when calling the controller method
+- The optional third element is an array of strings representing names of the request attributes to use as parameters when calling the controller method
 
-For example `[SomeController::class, '@index']` and `[SomeController::class, '@show', 'some_id']` are valid controller definitions. The first one execute the `SomeController` class `->index()` method and the second one execute its `->show($some_id)` method using the value of the request attribute named `'some_id'` as parameter.
+For example `[SomeController::class, '@index']` and `[SomeController::class, '@show', ['some_id']]` are valid controller definitions. The first one execute the `SomeController` class `->index()` method and the second one execute its `->show($id)` method using the value of the request attribute named `'some_id'` as parameter.
 
 This array notation was prefered over a string like `'SomeController@index'` so there is no need to deal with controller namespaces. Also the method name start with a `'@'` because `[SomeController::class, 'index']` is considered as a callable by php, even when the index method is not static!
 
@@ -70,6 +70,6 @@ $factory = new ControllerResolver($container, new DispatcherFactory);
 
 // Dispatchers using controller definitions as Psr-15 request handler can now be created.
 $dispatcher1 = $factory([SomeController::class, '@index'], [new SomeMiddleware]);
-$dispatcher2 = $factory([SomeController::class, '@show', 'some_id'], [new SomeMiddleware]);
+$dispatcher2 = $factory([SomeController::class, '@show', ['some_id']], [new SomeMiddleware]);
 $dispatcher3 = $factory([SomeController::class, '@store'], [new SomeMiddleware]);
 ```

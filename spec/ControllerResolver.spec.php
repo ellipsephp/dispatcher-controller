@@ -84,11 +84,11 @@ describe('ControllerResolver', function () {
 
                 it('should return a new ControllerRequestHandler using the defined controller, action and attributes', function () {
 
-                    $handler = new ControllerRequestHandler($this->container, 'Controller', 'action', ['id']);
+                    $handler = new ControllerRequestHandler($this->container, 'Controller', 'action', ['key1', 'key2']);
 
                     $this->delegate->__invoke->with($handler, '~')->returns($this->dispatcher);
 
-                    $test = ($this->resolver)(['Controller', '@action', 'id']);
+                    $test = ($this->resolver)(['Controller', '@action', ['key1', 'key2']]);
 
                     expect($test)->toBe($this->dispatcher);
 

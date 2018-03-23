@@ -59,8 +59,10 @@ class ControllerResolver implements DispatcherFactoryInterface
 
                     $class = array_shift($handler);
                     $method = substr(array_shift($handler), 1);
+                    $attributes = array_shift($handler) ?? [];
 
-                    $handler = new ControllerRequestHandler($this->container, $class, $method, $handler);
+
+                    $handler = new ControllerRequestHandler($this->container, $class, $method, $attributes);
 
                 }
 
