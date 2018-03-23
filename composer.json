@@ -1,7 +1,7 @@
 {
     "name": "ellipse/dispatcher-controller",
     "type": "library",
-    "description": "Psr-15 middleware dispatcher factory resolving controller classe names from a Psr-11 container",
+    "description": "Psr-15 middleware dispatcher factory resolving controller definitions",
     "keywords": [
         "Psr-15",
         "Psr-11",
